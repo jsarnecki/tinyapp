@@ -14,6 +14,13 @@ app.get("/", (req, res) => {
   res.render("pages/index");
 });
 
+app.get('/urls', (req, res) => {
+  const templateVars = {
+    urls: urlDatabase
+  };
+  res.render('urls_index', templateVars);
+})
+
 //about page
 app.get('/about', (req, res) => {
   res.render('pages/about');
