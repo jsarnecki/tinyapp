@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jsarnecki/tinyapp/issues"
   },
-  "homepage": "https://github.com/jsarnecki/tinyapp#readme"
+  "homepage": "https://github.com/jsarnecki/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }
