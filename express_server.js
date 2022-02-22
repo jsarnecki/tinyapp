@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-
+app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 function generateRandomString() {
@@ -14,7 +14,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.set('view engine', 'ejs');
+
 
 
 //////////////GET//////////////
@@ -49,8 +49,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-
-
 ///////////////POST/////////////////
 
 app.post('/urls', (req, res) => {
@@ -63,6 +61,13 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
+
+app.post('/urls/:shortURL', (req, res) => {
+  const updatedLongURL = req.body.updatedLongURL;
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = updatedLongURL;
   res.redirect('/urls');
 });
 
