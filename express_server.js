@@ -10,9 +10,9 @@ const urlDatabase = {
 app.set('view engine', 'ejs');
 
 //index page
-app.get("/", (req, res) => {
-  res.render("pages/index");
-});
+// app.get("/", (req, res) => {
+//   res.render("pages/index");
+// });
 
 app.get('/urls', (req, res) => {
   const templateVars = {
