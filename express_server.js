@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -9,16 +12,20 @@ const urlDatabase = {
 
 app.set('view engine', 'ejs');
 
-//index page
-// app.get("/", (req, res) => {
-//   res.render("pages/index");
-// });
-
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
+});
+
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  res.send("ok");
+})
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get('/urls/:shortURL', (req, res) => {
@@ -29,32 +36,12 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-//about page
-app.get('/about', (req, res) => {
-  res.render('pages/about');
-});
-
 //Use <%- include('RELATIVE/PATH/TO/FILE') %> to embed an EJS partial in another file.
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
-// app.get('/set', (req, res) => {
-//   const a = 1;
-//   res.send(`a: ${a}`);
-// });
-
-// app.get('/fetch', (req, res) => {
-//   res.send(`a, again: ${a}`);
-// })
+function generateRandomString() {
+  return Math.random().toString(36).substr(2, 6);
+}
