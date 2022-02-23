@@ -21,13 +21,17 @@
     </div>
     -->
       <form method="POST" action="/register">
+        <div class="form-group">
+          <label>User Identification</label>
+          <input class="form-control" placeholder="Login ID" type="text" name="id">
+        </div>
         <div class="form-group" >
           <label>Email</label>
-          <input placeholder="email" type="email" name="email" class="form-control" >
+          <input placeholder="Email" type="email" name="email" class="form-control" >
         </div> <!--FIX INPUT LENGTH-->
         <div class="form-group">
           <label>Password</label>
-          <input class="form-control" placeholder="password" type="password" name="password">
+          <input class="form-control" placeholder="Password" type="password" name="password">
         </div>
         <button type="submit" >Register</button>
       </form>
