@@ -17,8 +17,6 @@ const urlDatabase = {
 };
 
 
-
-
 //////////////GET//////////////
 
 ////HOME - ALL URLS
@@ -32,10 +30,14 @@ app.get('/urls', (req, res) => {
 
 ////NEW
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 
-/////SPECIFIC SHORT URL 
+/////URLS SHOW --- SPECIFIC SHORT URL 
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
@@ -79,15 +81,15 @@ app.post('/urls/:shortURL', (req, res) => {
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie("username", username);
-
-  // const username = req.cookies["username"];
-  // console.log(username);
-  // const templateVars = {
-  //   username: username,
-  //   dataBase: urlDatabase
-  // }
+  //Adds 'username' to cookies, so that tempVars  
+  //can pick it up in get('/urls') via req.cookies ln28
   res.redirect('/urls');
-// res.render('/urls_index', templateVars);
+});
+
+////LOGOUT
+app.post('/logout', (req, res) => {
+  res.clearCookie("username");
+  res.redirect('/urls');
 });
 
 

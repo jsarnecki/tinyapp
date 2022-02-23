@@ -9,11 +9,14 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-      <% if (username) { %>
+      <% if (username) { %> <!--HAVE THIS STICK TO FAR RIGHT-->
         <%= username %>
-       <% } else { %>
-         <form  method="POST" action="/login">
-        <input name="username">
+        <form  method="POST" action="/logout"><!--MAKE THESE LOOK PRETTY-->
+          <button type="submit" method="POST" class="btn btn-danger">Logout</button>
+          </form>
+       <% } else { %><!--MAKE THESE LOOK PRETTY-->
+        <form  method="POST" action="/login">
+        <input name="username" placeholder="Username">
         <button type="submit" method="POST">Login</button>
         </form>
      <% } %> 
