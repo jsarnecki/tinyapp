@@ -5,12 +5,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>Tiny URL Registry</title>
+  <title>Tiny URL Login</title>
 </head>
 <body>
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
-    <h3>Register</h3>
+    <h3>Login</h3>
     <!--
     <div>
       <form method="POST" action="/register">
@@ -21,10 +21,6 @@
     </div>
     -->
       <form method="POST" action="/register">
-        <div class="form-group">
-          <label>User Identification</label>
-          <input class="form-control" placeholder="Login ID" type="text" name="userID">
-        </div>
         <div class="form-group" >
           <label>Email</label>
           <input placeholder="Email" type="email" name="email" class="form-control" >
@@ -33,7 +29,7 @@
           <label>Password</label>
           <input class="form-control" placeholder="Password" type="password" name="password">
         </div>
-        <button type="submit" >Register</button>
+        <button type="submit">Login</button>
       </form>
 
 

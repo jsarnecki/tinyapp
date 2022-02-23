@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+const { authenticateEmail, authenticateUser } = require('./Helpers/helperFunctions');
 
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
@@ -18,12 +19,12 @@ const urlDatabase = {
 
 const users = {
   'admin': {
-  _id: 'admin',
+  id: 'admin',
     email: 'joshsarnecki@gmail.com',
     password: 'teacup'
   },
   "userRandomID": {
-  _id: "userRandomID", 
+  id: "userRandomID", 
     email: "user@example.com", 
     password: "purple-monkey-dinosaur"
   }
@@ -120,11 +121,21 @@ app.post('/logout', (req, res) => {
 
 /////REGISTER
 app.post('/register', (req, res) => {
-  const {id, email, password } = req.body;
-  users[id] = {id, email, password};
-  res.cookie('user_id', id);
-  console.log("users:", users);
+  const newUser = {
+    userID: req.body.userID,
+    email: req.body.email,
+    password: req.body.email
+  };
 
+  const {error, data} = authenticateUser(newUser, users);
+
+  if (error) {
+    return res.status(400).send(error);
+  }
+
+  users[newUser.userID] = newUser;
+  res.cookie('user_id', newUser.userID);
+  // console.log("users:", users);
   res.redirect('/urls');
 });
 
