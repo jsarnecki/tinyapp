@@ -16,18 +16,19 @@
           <button type="submit" method="POST" class="btn btn-danger">Logout</button>
           </form>
        <% } else { %><!--MAKE THESE LOOK PRETTY-->
-        <form  method="POST" action="/login">
-        <input name="username" placeholder="Username">
+        <form  method="GET" action="/login">
         <button type="submit" method="POST">Login</button>
         </form>
       <% } %> 
       </div>
+      <% if (!user) { %> 
       <div>
         <!--Register-->
         <form action="/register">
           <button type="submit">Register</button>
         </form>
       </div>
+      <% } %> 
     </div>
   </nav>
 </header>

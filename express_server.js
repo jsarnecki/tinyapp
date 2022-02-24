@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-const { authenticateEmail, authenticateUser } = require('./Helpers/helperFunctions');
+const { authenticateEmail, authenticateUser, getUserByEmail, passwordVerify } = require('./Helpers/helperFunctions');
 
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
@@ -19,14 +19,14 @@ const urlDatabase = {
 
 const users = {
   'admin': {
-  id: 'admin',
-    email: 'joshsarnecki@gmail.com',
-    password: 'teacup'
+      id: 'admin',
+      email: 'joshsarnecki@gmail.com',
+      password: 'teacup'
   },
   "userRandomID": {
-  id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+      id: "userRandomID", 
+      email: "user@example.com", 
+      password: "purple-monkey-dinosaur"
   }
 };
 
@@ -45,9 +45,10 @@ app.get('/urls', (req, res) => {
 
 ////NEW
 app.get("/urls/new", (req, res) => {
+  const user = users[req.cookies["user_id"]];
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies["user_id"]
+    user
   };
   res.render("urls_new", templateVars);
 });
@@ -81,6 +82,17 @@ app.get('/register', (req, res) => {
   res.render('urls_register', templateVars);
 });
 
+/////LOGIN
+app.get('/login', (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user
+  };
+  res.render('urls_login', templateVars);
+});
+
 
 ///////////////POST/////////////////
 
@@ -104,13 +116,27 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls');
 });
 
-////COOKIES
+//// LOGIN --- COOKIES
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
-  //Adds 'username' to cookies, so that tempVars  
-  //can pick it up in get('/urls') via req.cookies ln28
+
+  const { password, email } = req.body;
+  let user = getUserByEmail(email, users);
+  let isPassword = passwordVerify(password, users);
+
+  if (!user) {
+    return res.status(403).send('404 Error: Email error');
+  }
+
+  if (isPassword === false) {
+    return res.status(403).send('404 Error: Password error');
+  }
+  
+  res.cookie('user_id', user.id);
+
+  //console.log("user:", user);
+
   res.redirect('/urls');
+  console.log("invalid email");
 });
 
 ////LOGOUT
@@ -122,20 +148,22 @@ app.post('/logout', (req, res) => {
 /////REGISTER
 app.post('/register', (req, res) => {
   const newUser = {
-    userID: req.body.userID,
+    id: req.body.userID,
     email: req.body.email,
-    password: req.body.email
+    password: req.body.password
   };
 
+  //authenticates the ID, email, and checks for empty inputs
   const {error, data} = authenticateUser(newUser, users);
 
   if (error) {
     return res.status(400).send(error);
   }
 
-  users[newUser.userID] = newUser;
-  res.cookie('user_id', newUser.userID);
-  // console.log("users:", users);
+  users[newUser.id] = newUser;//adds newUser to users
+  //res.cookie('newUser', newUser);
+  res.cookie('user_id', newUser.id);
+  console.log("users:", users);
   res.redirect('/urls');
 });
 
