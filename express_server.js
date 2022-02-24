@@ -13,8 +13,14 @@ function generateRandomString() {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "admin"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "admin"
+  }
 };
 
 const users = {
@@ -31,15 +37,43 @@ const users = {
 };
 
 
+const getUserURL = (user, urlDB) => {
+  const obj = {};
+  for (let url in urlDB) {
+    if (urlDB[url].userID === user.id) {
+      obj[url] = urlDB[url].longURL;
+    }
+  }
+  return obj;
+}
+
+
+
 //////////////GET//////////////
 
 ////HOME - ALL URLS
 app.get('/urls', (req, res) => {
   const user = users[req.cookies["user_id"]];
+  console.log("user:", user);
+
+  if (user) {//POTENTIALLY CHANGE, (.. !urlDB), or else it may screw up when coming back to this
+
+
+    //IF USER IS DEFINED
+    const urlDB = getUserURL(user, urlDatabase);
+    console.log(urlDB);
+    const templateVars = {
+      urls: urlDB, 
+      user
+    };
+    res.render('urls_index', templateVars);
+  }
+
+  //IF USER IS NOT DEFINED
   const templateVars = {
-    urls: urlDatabase,
     user
   };
+
   res.render('urls_index', templateVars);
 });
 
@@ -55,12 +89,19 @@ app.get("/urls/new", (req, res) => {
 
 /////URLS SHOW --- SPECIFIC SHORT URL 
 app.get('/urls/:shortURL', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.cookies["user_id"]];//this already sorted
+
+  //console.log("urlDatabase:", urlDatabase);
+  //console.log("new urlDB:", urlDB);
+
+  const urlDB = getUserURL(user, urlDatabase);
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDB[req.params.shortURL],
+    urls: urlDB, 
     user
   };
+
   res.render('urls_show', templateVars);
 });
 
@@ -96,23 +137,37 @@ app.get('/login', (req, res) => {
 
 ///////////////POST/////////////////
 
+//////SUBMIT URL & GENERATE-ID
 app.post('/urls', (req, res) => {
   //Turns submitted url into random shortURL and redirects
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  const longURL = req.body.longURL;
+  const user = users[req.cookies["user_id"]];
+
+  urlDatabase[shortURL] = {
+    longURL: longURL,
+    userID: user.id
+  };
+  
   res.redirect(`/urls/${shortURL}`);
 });
 
+//////DELETE URL
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
+/////UPDATES/EDITS SHORT URL
 app.post('/urls/:shortURL', (req, res) => {
   const updatedLongURL = req.body.updatedLongURL;
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = updatedLongURL;
+
+  urlDatabase[shortURL].longURL = updatedLongURL;
+  //update the urlDB 
+  //urlDB[shortURL] = updatedLongURL;
+
   res.redirect('/urls');
 });
 
