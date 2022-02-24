@@ -27,6 +27,8 @@
       </thead>
       <tbody>
         <!--LOGGED IN?  SHOW CORROSPONDING URLS-->
+
+
           <% for(let url in urls) { %>
         <tr>
           <td><%= url %></td>
@@ -39,7 +41,10 @@
         </tr>
       </tbody>
     </table>
-
+    <!-- 
+      <%  if (!urls.user) { %>
+                <h3>Click on Create new URL to begin</h3>
+                <% } %>-->
   <% } else { %>
 
       <h3>Welcome to TinyApp!</h3>

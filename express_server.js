@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+const bcrypt = require('bcryptjs');
+
 const { authenticateEmail, authenticateUser, getUserByEmail, passwordVerify } = require('./Helpers/helperFunctions');
 
 function generateRandomString() {
@@ -64,11 +66,12 @@ app.get('/urls', (req, res) => {
   console.log("user:", user);
 
   if (user) {//POTENTIALLY CHANGE, (.. !urlDB), or else it may screw up when coming back to this
-
-
     //IF USER IS DEFINED
+    
+    // function(urlDatabase) {} Function to check if user has urls yet, if not, add the "checkout new url button to get started"
+
     const urlDB = getUserURL(user, urlDatabase);
-    console.log(urlDB);
+    console.log("urlDB:", urlDB);
     const templateVars = {
       urls: urlDB, 
       user
@@ -199,11 +202,11 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const user = users[req.cookies["user_id"]];
 
   if (!user) {
-    console.log("this user deleted tho shouldnt have:", user);
+    //console.log("this user deleted tho shouldnt have:", user);
     return res.redirect('/urls');
   }
 
-  console.log("this user deleted:", user);
+  console.log(`${user} deleted ${req.params.shortURL}`);
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -267,11 +270,16 @@ app.post('/register', (req, res) => {
 
   //authenticates the ID, email, and checks for empty inputs
   const {error, data} = authenticateUser(newUser, users);
-
+  //validates that there is infact input
   if (error) {
     return res.status(400).send(error);
   }
 
+  //Now hash the password
+  const hashedPassword = bcrypt.hashSync(newUser.password, 10);
+  newUser.password = hashedPassword;
+  //UPDATE newUser.password TO HASHED BEFORE 
+  
   users[newUser.id] = newUser;//adds newUser to users
   //res.cookie('newUser', newUser);
   res.cookie('user_id', newUser.id);
