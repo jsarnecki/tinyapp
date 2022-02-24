@@ -123,6 +123,8 @@ app.post('/login', (req, res) => {
   let user = getUserByEmail(email, users);
   let isPassword = passwordVerify(password, users);
 
+  // console.log("password submitted:", password);
+
   if (!user) {
     return res.status(403).send('404 Error: Email error');
   }
@@ -136,7 +138,6 @@ app.post('/login', (req, res) => {
   //console.log("user:", user);
 
   res.redirect('/urls');
-  console.log("invalid email");
 });
 
 ////LOGOUT

@@ -42,11 +42,12 @@ const getUserByEmail = (email, users) => {
 
 const passwordVerify = (password, users) => {
   for (let id in users) {
+    console.log("password loop check:", users[id].password, "users:", users[id]);
     if (users[id].password === password) {
       return true;
     }
-    return false;
   }
+  return false;
 }
 
 
