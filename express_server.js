@@ -178,6 +178,12 @@ app.post('/urls', (req, res) => {
   //Turns submitted url into random shortURL and redirects
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
+
+  //if longURL does not start with http://, return error
+  if (longURL.length === 0 || !longURL.includes("http://")) {
+    return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
+  }
+
   const user = users[req.cookies["user_id"]];
 
   urlDatabase[shortURL] = {
@@ -190,6 +196,14 @@ app.post('/urls', (req, res) => {
 
 //////DELETE URL
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const user = users[req.cookies["user_id"]];
+
+  if (!user) {
+    console.log("this user deleted tho shouldnt have:", user);
+    return res.redirect('/urls');
+  }
+
+  console.log("this user deleted:", user);
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -197,8 +211,14 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 /////UPDATES/EDITS SHORT URL
 app.post('/urls/:shortURL', (req, res) => {
+
+  //If updatedLURL is no length, or does not start with http:// return error
   const updatedLongURL = req.body.updatedLongURL;
   const shortURL = req.params.shortURL;
+
+  if (updatedLongURL.length === 0 || !updatedLongURL.includes("http://")) {
+    return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
+  }
 
   urlDatabase[shortURL].longURL = updatedLongURL;
   //update the urlDB 

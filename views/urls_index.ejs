@@ -10,6 +10,10 @@
 </head>
 <body>
   <%- include('partials/_header') %>
+
+
+  <% if (user) { %>
+
   <main style="margin: 1em;">
     <h3>My URLs</h3>
     <table class="table">
@@ -23,21 +27,34 @@
       </thead>
       <tbody>
         <!--LOGGED IN?  SHOW CORROSPONDING URLS-->
-      <% if (user) { %>
-        <% for(let url in urls) { %>
+          <% for(let url in urls) { %>
         <tr>
           <td><%= url %></td>
           <td><%= urls[url] %></td>
           <td><a href="/urls/<%= url %>">Edit URL</a></td>
           <td><form method="POST" action="/urls/<%= url %>/delete"><!--MAKE THESE LOOK PRETTY-->
             <button type="submit" class="btn btn-danger">Delete</button></form>
-          </td>
+         <% } %>
+         </td>
         </tr>
-        <% } %>
-     <% } %>
-        
       </tbody>
     </table>
+
+  <% } else { %>
+
+      <h3>Welcome to TinyApp!</h3>
+      <h4>
+        If you are returning user, please login.<!-- ALLIGN!  MAKE THESE LOOK PRETTY-->
+        <br>
+        Otherwise, please register to begin.
+      </h4>
+
+  <% } %> 
+
+
+
+
+
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
