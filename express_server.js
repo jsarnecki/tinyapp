@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 const bcrypt = require('bcryptjs');
 
-const { authenticateEmail, authenticateUser, getUserByEmail, passwordVerify } = require('./Helpers/helperFunctions');
+const { authenticateEmail, authenticateUser, getUserByEmail, findHashPassword } = require('./Helpers/helperFunctions');
 
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
@@ -29,7 +29,7 @@ const users = {
   'admin': {
       id: 'admin',
       email: 'joshsarnecki@gmail.com',
-      password: 'teacup'
+      password: '$2a$10$r7vErsgCElCbKdbRfUkASebHpuGUJ9D9h9sBwBb9wyFRuTbgnnQJi'
   },
   "userRandomID": {
       id: "userRandomID", 
@@ -235,15 +235,16 @@ app.post('/login', (req, res) => {
 
   const { password, email } = req.body;
   let user = getUserByEmail(email, users);
-  let isPassword = passwordVerify(password, users);
 
-  // console.log("password submitted:", password);
+  const hashedPassword = findHashPassword(email, users);
+
+  const passwordCheck = bcrypt.compareSync(password, hashedPassword);
 
   if (!user) {
     return res.status(403).send('404 Error: Email error');
   }
 
-  if (isPassword === false) {
+  if (passwordCheck === false) {
     return res.status(403).send('404 Error: Password error');
   }
   
@@ -279,7 +280,7 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(newUser.password, 10);
   newUser.password = hashedPassword;
   //UPDATE newUser.password TO HASHED BEFORE 
-  
+
   users[newUser.id] = newUser;//adds newUser to users
   //res.cookie('newUser', newUser);
   res.cookie('user_id', newUser.id);
