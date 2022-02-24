@@ -47,6 +47,13 @@ const getUserURL = (user, urlDB) => {
   return obj;
 }
 
+const originalDataLayout = (db) => {
+  let obj = {};
+  for (let longURL in db) {
+    obj.longURL = db[longURL].longURL;
+  }
+  return obj;
+}
 
 
 //////////////GET//////////////
@@ -68,9 +75,11 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   }
+  let urlDB = originalDataLayout(urlDatabase);
 
   //IF USER IS NOT DEFINED
   const templateVars = {
+    urls: urlDB,
     user
   };
 
@@ -93,8 +102,30 @@ app.get('/urls/:shortURL', (req, res) => {
 
   //console.log("urlDatabase:", urlDatabase);
   //console.log("new urlDB:", urlDB);
+  if (!user) {
+    //IF TRYING TO ACCESS LINK NOT LOGGED IN
+  console.log("trigger2");
+   let urlDB = originalDataLayout(urlDatabase);
+   console.log("new:", urlDB);
+  
+   const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDB.longURL,
+    urls: urlDB, 
+    user
+    };
+
+  console.log("shortURL:", templateVars.shortURL);
+  console.log("urlDB:", templateVars.urls);
+  console.log("urlDatabase:", urlDatabase);
+
+  res.render('urls_show', templateVars);
+  }
+
 
   const urlDB = getUserURL(user, urlDatabase);
+  console.log("trigger1");
+  
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDB[req.params.shortURL],
@@ -102,13 +133,18 @@ app.get('/urls/:shortURL', (req, res) => {
     user
   };
 
+  console.log("shortURL:", templateVars.shortURL);
+  console.log("longURL:", templateVars.longURL);
+  console.log("urlDB:", templateVars.urls);
+  console.log("urlDatabase:", urlDatabase);
+
   res.render('urls_show', templateVars);
 });
 
 /////TO ACTUAL LONG URL REDIRECT
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
