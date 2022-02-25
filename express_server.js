@@ -14,11 +14,14 @@ app.use(cookieSession({
 
 const bcrypt = require('bcryptjs');
 
-const { authenticateEmail, authenticateUser, getUserByEmail, findHashPassword } = require('./Helpers/helperFunctions');
-
-function generateRandomString() {
-  return Math.random().toString(36).substr(2, 6);
-};
+const { 
+  generateRandomString,
+  authenticateUser,
+  getUserByEmail,
+  findHashPassword,
+  getUserURL,
+  originalDataLayout
+  } = require('./helpers/helperFunctions');
 
 const urlDatabase = {
   "b2xVn2": {
@@ -32,6 +35,11 @@ const urlDatabase = {
 };
 
 const users = {
+  'testUser': {
+    id: 'testUser',
+    email: 'test@user.ca',
+    password: '$2a$10$bmDZVNexuP9GZHPtrOVywepwP2tlrZvehKGwm9WxWpyxwc.f8Prrm'
+  },
   'admin': {
       id: 'admin',
       email: 'joshsarnecki@gmail.com',
@@ -44,59 +52,43 @@ const users = {
   }
 };
 
-
-const getUserURL = (user, urlDB) => {
-  const obj = {};
-  for (let url in urlDB) {
-    if (urlDB[url].userID === user) {
-      obj[url] = urlDB[url].longURL;
-    }
-  }
-  return obj;
-}
-
-const originalDataLayout = (db) => {
-  let obj = {};
-  for (let longURL in db) {
-    obj.longURL = db[longURL].longURL;
-  }
-  return obj;
-}
-
-
 //////////////GET//////////////
 
 ////HOME - ALL URLS
 app.get('/urls', (req, res) => {
   //const user = users[req.cookies["user_id"]];
   const user = req.session.user_id;
-  console.log("first user:", user);
-  console.log("users, before checking if user is defined:", users);
+  // console.log("first user:", user);
+  // console.log("users, before checking if user is defined:", users);
 
-  if (user) {//POTENTIALLY CHANGE, (.. !urlDB), or else it may screw up when coming back to this
-    //IF USER IS DEFINED
-    console.log("users, after checking  user IS defined:", users);
+  // if (user) {//POTENTIALLY CHANGE, (.. !urlDB), or else it may screw up when coming back to this
+  //   //IF USER IS DEFINED
+  //   //console.log("users, after checking  user IS defined:", users);
     
-    // function(urlDatabase) {} Function to check if user has urls yet, if not, add the "checkout new url button to get started"
+  //   // function(urlDatabase) {} Function to check if user has urls yet, if not, add the "checkout new url button to get started"
 
-    const urlDB = getUserURL(user, urlDatabase);
-    console.log("urlDB:", urlDB);
-    const templateVars = {
-      urls: urlDB,
-      users,
-      user
-    };
-    res.render('urls_index', templateVars);
-  }
+  //   const urlDB = getUserURL(user, urlDatabase);
+  //   console.log("urlDB:", urlDB);
+  //   const templateVars = {
+  //     urls: urlDB,
+  //     users,
+  //     user
+  //   };
+  //   console.log("users", users);
+  //   res.render('urls_index', templateVars);
+  // }
 
-
+  const urlDB = getUserURL(user, urlDatabase);
   //IF USER IS NOT DEFINED
-  let urlDB = originalDataLayout(urlDatabase);
+  let formattedURLS = originalDataLayout(urlDB);
+
   const templateVars = {
     urls: urlDB,
+    users,
     user
   };
 
+  console.log("user undefined?", user);
   res.render('urls_index', templateVars);
 });
 
@@ -115,39 +107,17 @@ app.get("/urls/new", (req, res) => {
 
 /////URLS SHOW --- SPECIFIC SHORT URL 
 app.get('/urls/:shortURL', (req, res) => {
-  //const user = users[req.cookies["user_id"]];//this already sorted
+
   const user = req.session.user_id;
 
-
-  console.log("third user:", user);
-
-  //console.log("urlDatabase:", urlDatabase);
-  //console.log("new urlDB:", urlDB);
   if (!user) {
     //IF TRYING TO ACCESS LINK NOT LOGGED IN
-  console.log("trigger2");
-   let urlDB = originalDataLayout(urlDatabase);
-   console.log("new urlDB, if user is falsy:", urlDB);
-  
-   const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDB.longURL,
-    urls: urlDB,
-    users,
-    user
+    return res.status(403).send('404 Error: Forbidden');
+
     };
 
-  console.log("shortURL if user is falsy:", templateVars.shortURL);
-  console.log("urlDB if user is falsy:", templateVars.urls);
-  console.log("urlDatabase if user is falsy:", urlDatabase);
-
-  res.render('urls_show', templateVars);
-  }
-
-
   const urlDB = getUserURL(user, urlDatabase);
-  console.log("trigger1, user not falsy");
-  
+
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDB[req.params.shortURL],
@@ -155,11 +125,6 @@ app.get('/urls/:shortURL', (req, res) => {
     users,
     user
   };
-
-  console.log("shortURL user not falsy:", templateVars.shortURL);
-  console.log("longURL user not falsy:", templateVars.longURL);
-  console.log("urlDB user not falsy:", templateVars.urls);
-  console.log("urlDatabase user not falsy:", urlDatabase);
 
   res.render('urls_show', templateVars);
 });
@@ -173,7 +138,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 ////REGISTER
 app.get('/register', (req, res) => {
-  // const user = users[req.cookies["user_id"]];
+
   const user = req.session.user_id;
 
   console.log("req.session, get register:", req.session);
@@ -182,7 +147,6 @@ app.get('/register', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    // users,
     user
   };
   res.render('urls_register', templateVars);
@@ -190,7 +154,6 @@ app.get('/register', (req, res) => {
 
 /////LOGIN
 app.get('/login', (req, res) => {
-  //const user = users[req.cookies["user_id"]];
   const user = req.session.user_id;
 
   console.log("user get login:", user);
@@ -210,6 +173,7 @@ app.get('/login', (req, res) => {
 //////SUBMIT URL & GENERATE-ID
 app.post('/urls', (req, res) => {
   //Turns submitted url into random shortURL and redirects
+  
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
 
@@ -218,16 +182,12 @@ app.post('/urls', (req, res) => {
     return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
   }
 
-  // const user = users[req.cookies["user_id"]];
   const user = req.session.user_id;
-
-  console.log("user post /urls:", user);
-
 
   urlDatabase[shortURL] = {
     longURL: longURL,
     users,
-    userID: user/* .id ???*/
+    userID: user
   };
   
   res.redirect(`/urls/${shortURL}`);
@@ -235,18 +195,12 @@ app.post('/urls', (req, res) => {
 
 //////DELETE URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-  // const user = users[req.cookies["user_id"]];
   const user = req.session.user_id;
 
-  console.log("user post delete:", user);
-
-
   if (!user) {
-    //console.log("this user deleted tho shouldnt have:", user);
     return res.redirect('/urls');
   }
 
-  console.log(`${user} deleted ${req.params.shortURL}`);
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -276,13 +230,12 @@ app.post('/login', (req, res) => {
   const { password, email } = req.body;
   let user = getUserByEmail(email, users);
 
-  const hashedPassword = findHashPassword(email, users);
-
-  const passwordCheck = bcrypt.compareSync(password, hashedPassword);
-
   if (!user) {
     return res.status(403).send('404 Error: Email error');
   }
+
+  const hashedPassword = findHashPassword(email, users);
+  const passwordCheck = bcrypt.compareSync(password, hashedPassword);
 
   if (passwordCheck === false) {
     return res.status(403).send('404 Error: Password error');
