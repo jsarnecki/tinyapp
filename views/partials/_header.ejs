@@ -15,7 +15,7 @@
       </div>
       <div>
       <% if (user) { %> <!--HAVE THIS STICK TO FAR RIGHT-->
-        <%= user.email %> <!--FIX ALIGNMENT-->
+        <%= users[user].email %> <!--FIX ALIGNMENT-->
         <form  method="POST" action="/logout"><!--MAKE THESE LOOK PRETTY-->
           <button type="submit" method="POST" class="btn btn-danger">Logout</button>
           </form>

@@ -2,10 +2,16 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret test one', 'another secret test']
+}));
+
 const bcrypt = require('bcryptjs');
 
 const { authenticateEmail, authenticateUser, getUserByEmail, findHashPassword } = require('./Helpers/helperFunctions');
@@ -42,7 +48,7 @@ const users = {
 const getUserURL = (user, urlDB) => {
   const obj = {};
   for (let url in urlDB) {
-    if (urlDB[url].userID === user.id) {
+    if (urlDB[url].userID === user) {
       obj[url] = urlDB[url].longURL;
     }
   }
@@ -62,25 +68,30 @@ const originalDataLayout = (db) => {
 
 ////HOME - ALL URLS
 app.get('/urls', (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  console.log("user:", user);
+  //const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
+  console.log("first user:", user);
+  console.log("users, before checking if user is defined:", users);
 
   if (user) {//POTENTIALLY CHANGE, (.. !urlDB), or else it may screw up when coming back to this
     //IF USER IS DEFINED
+    console.log("users, after checking  user IS defined:", users);
     
     // function(urlDatabase) {} Function to check if user has urls yet, if not, add the "checkout new url button to get started"
 
     const urlDB = getUserURL(user, urlDatabase);
     console.log("urlDB:", urlDB);
     const templateVars = {
-      urls: urlDB, 
+      urls: urlDB,
+      users,
       user
     };
     res.render('urls_index', templateVars);
   }
-  let urlDB = originalDataLayout(urlDatabase);
+
 
   //IF USER IS NOT DEFINED
+  let urlDB = originalDataLayout(urlDatabase);
   const templateVars = {
     urls: urlDB,
     user
@@ -91,17 +102,24 @@ app.get('/urls', (req, res) => {
 
 ////NEW
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  // const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
   const templateVars = {
     urls: urlDatabase,
+    users,
     user
   };
+  console.log("second user:", user);
   res.render("urls_new", templateVars);
 });
 
 /////URLS SHOW --- SPECIFIC SHORT URL 
 app.get('/urls/:shortURL', (req, res) => {
-  const user = users[req.cookies["user_id"]];//this already sorted
+  //const user = users[req.cookies["user_id"]];//this already sorted
+  const user = req.session.user_id;
+
+
+  console.log("third user:", user);
 
   //console.log("urlDatabase:", urlDatabase);
   //console.log("new urlDB:", urlDB);
@@ -109,37 +127,39 @@ app.get('/urls/:shortURL', (req, res) => {
     //IF TRYING TO ACCESS LINK NOT LOGGED IN
   console.log("trigger2");
    let urlDB = originalDataLayout(urlDatabase);
-   console.log("new:", urlDB);
+   console.log("new urlDB, if user is falsy:", urlDB);
   
    const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDB.longURL,
-    urls: urlDB, 
+    urls: urlDB,
+    users,
     user
     };
 
-  console.log("shortURL:", templateVars.shortURL);
-  console.log("urlDB:", templateVars.urls);
-  console.log("urlDatabase:", urlDatabase);
+  console.log("shortURL if user is falsy:", templateVars.shortURL);
+  console.log("urlDB if user is falsy:", templateVars.urls);
+  console.log("urlDatabase if user is falsy:", urlDatabase);
 
   res.render('urls_show', templateVars);
   }
 
 
   const urlDB = getUserURL(user, urlDatabase);
-  console.log("trigger1");
+  console.log("trigger1, user not falsy");
   
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDB[req.params.shortURL],
-    urls: urlDB, 
+    urls: urlDB,
+    users,
     user
   };
 
-  console.log("shortURL:", templateVars.shortURL);
-  console.log("longURL:", templateVars.longURL);
-  console.log("urlDB:", templateVars.urls);
-  console.log("urlDatabase:", urlDatabase);
+  console.log("shortURL user not falsy:", templateVars.shortURL);
+  console.log("longURL user not falsy:", templateVars.longURL);
+  console.log("urlDB user not falsy:", templateVars.urls);
+  console.log("urlDatabase user not falsy:", urlDatabase);
 
   res.render('urls_show', templateVars);
 });
@@ -153,10 +173,16 @@ app.get("/u/:shortURL", (req, res) => {
 
 ////REGISTER
 app.get('/register', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  // const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
+
+  console.log("req.session, get register:", req.session);
+  console.log("user get register:", user);
+
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    // users,
     user
   };
   res.render('urls_register', templateVars);
@@ -164,10 +190,15 @@ app.get('/register', (req, res) => {
 
 /////LOGIN
 app.get('/login', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  //const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
+
+  console.log("user get login:", user);
+
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    users,
     user
   };
   res.render('urls_login', templateVars);
@@ -187,11 +218,16 @@ app.post('/urls', (req, res) => {
     return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
   }
 
-  const user = users[req.cookies["user_id"]];
+  // const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
+
+  console.log("user post /urls:", user);
+
 
   urlDatabase[shortURL] = {
     longURL: longURL,
-    userID: user.id
+    users,
+    userID: user/* .id ???*/
   };
   
   res.redirect(`/urls/${shortURL}`);
@@ -199,7 +235,11 @@ app.post('/urls', (req, res) => {
 
 //////DELETE URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  // const user = users[req.cookies["user_id"]];
+  const user = req.session.user_id;
+
+  console.log("user post delete:", user);
+
 
   if (!user) {
     //console.log("this user deleted tho shouldnt have:", user);
@@ -248,7 +288,10 @@ app.post('/login', (req, res) => {
     return res.status(403).send('404 Error: Password error');
   }
   
-  res.cookie('user_id', user.id);
+  //res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
+
+  console.log("req.session.user_id post login:", req.session.user_id);
 
   //console.log("user:", user);
 
@@ -257,7 +300,9 @@ app.post('/login', (req, res) => {
 
 ////LOGOUT
 app.post('/logout', (req, res) => {
-  res.clearCookie("user_id");
+  //res.clearCookie("user_id");
+  req.session = null;
+  console.log("logout post, should be null:", req.session);
   res.redirect('/urls');
 });
 
@@ -283,8 +328,11 @@ app.post('/register', (req, res) => {
 
   users[newUser.id] = newUser;//adds newUser to users
   //res.cookie('newUser', newUser);
-  res.cookie('user_id', newUser.id);
+  //res.cookie('user_id', newUser.id);
+  req.session.user_id = newUser.id;
   console.log("users:", users);
+  console.log("req.session.user_id  post register, set from newUser.id:", req.session.user_id);
+
   res.redirect('/urls');
 });
 
