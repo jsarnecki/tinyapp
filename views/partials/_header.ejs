@@ -14,12 +14,12 @@
         <% } %>
       </div>
       <div>
-      <% if (user) { %> <!--HAVE THIS STICK TO FAR RIGHT-->
-        <%= users[user].email %> <!--FIX ALIGNMENT-->
-        <form  method="POST" action="/logout"><!--MAKE THESE LOOK PRETTY-->
+      <% if (user) { %>
+        <%= users[user].email %>
+        <form  method="POST" action="/logout">
           <button type="submit" method="POST" class="btn btn-danger">Logout</button>
           </form>
-       <% } else { %><!--MAKE THESE LOOK PRETTY-->
+      <% } else { %>
         <form  method="GET" action="/login">
         <button type="submit" method="POST">Login</button>
         </form>

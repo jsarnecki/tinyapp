@@ -1,50 +1,4 @@
-
-function generateRandomString() {
-  return Math.random().toString(36).substr(2, 6);
-};
-
-const authenticateEmail = (checkUser, userDB) => {
-  for (const id in userDB) {
-    if (userDB[id].email === checkUser.email) {
-      console.log({error: "404 Error: Email already in use", data: null});
-      return {error: '404 Error: Email already in use', data: null};
-      //res.status(400).send('404 Error: Email already in use');
-    }
-  }
-  return {error: null, data: checkUser};
-};
-
-const authenticateUser = (checkUser, userDB) => {
-  if (!checkUser.id || !checkUser.email || !checkUser.password) {
-    console.log({error: "404 Error: Must fill in all inputs", data: null});
-    return {error: '404 Error: Must fill in all inputs', data: null};
-    //res.status(400).send('404 Error: Must fill in all inputs');
-  }
-  if(userDB[checkUser.id]) {
-    console.log({error: "404 Error: UserID already in use", data: null});
-    return {error: '404 Error: UserID already in use', data: null};
-    // res.status(400).send('404 Error: UserID already in use');
-  }
-  for (const id in userDB) {
-    if (userDB[id].email === checkUser.email) {
-      console.log({error: "404 Error: Email already in use", data: null});
-      return {error: '404 Error: Email already in use', data: null};
-      //res.status(400).send('404 Error: Email already in use');
-    }
-  }
-  return {error: null, data: checkUser};
-};
-
-const getUserByEmail = (email, users) => {
-  for (let id in users) {
-    if (users[id].email === email) {
-     // console.log(`${users[id].email} === ${email}`);
-      return users[id];
-    }
-   //console.log("email:", users[id].email);
-  }
-}
-
+//FOR POTENTIAL TESTING PURPOSES
 const users = {
   'testUser': {
     id: 'testUser',
@@ -62,7 +16,7 @@ const users = {
       password: "purple-monkey-dinosaur"
   }
 };
-
+//FOR POTENTIAL TESTING PURPOSES
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -74,48 +28,72 @@ const urlDatabase = {
   }
 };
 
+function generateRandomString() {
+  return Math.random().toString(36).substr(2, 6);
+};
 
+const authenticateEmail = (checkUser, userDB) => {
+  for (const id in userDB) {
+    if (userDB[id].email === checkUser.email) {
+      console.log({error: "404 Error: Email already in use", data: null});
+      return {error: '404 Error: Email already in use', data: null};
+    }
+  }
+  return {error: null, data: checkUser};
+};
 
-// const passwordVerify = (password, users) => {
-//   for (let id in users) {
-//     //console.log("password loop check:", users[id].password, "users:", users[id]);
-//     if (users[id].password === password) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
+const authenticateUser = (checkUser, userDB) => {
+  if (!checkUser.id || !checkUser.email || !checkUser.password) {
+    console.log({error: "404 Error: Must fill in all inputs", data: null});
+    return {error: '404 Error: Must fill in all inputs', data: null};
+  }
+  if(userDB[checkUser.id]) {
+    console.log({error: "404 Error: UserID already in use", data: null});
+    return {error: '404 Error: UserID already in use', data: null};
+  }
+  for (const id in userDB) {
+    if (userDB[id].email === checkUser.email) {
+      console.log({error: "404 Error: Email already in use", data: null});
+      return {error: '404 Error: Email already in use', data: null};
+    }
+  }
+  return {error: null, data: checkUser};
+};
+
+const getUserByEmail = (email, users) => {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
+};
 
 const findHashPassword = (email, users) => {
-  for (let id in users) {
-    //console.log("password loop check:", users[id].password, "users:", users[id]);
+  for (const id in users) {
     if (users[id].email === email) {
       return users[id].password;
     }
   }
   return false;
-}
+};
 
 const getUserURL = (user, urlDB) => {
   const obj = {};
-  for (let url in urlDB) {
+  for (const url in urlDB) {
     if (urlDB[url].userID === user) {
       obj[url] = urlDB[url].longURL;
     }
   }
   return obj;
-}
+};
 
 const originalDataLayout = (db) => {
-  let obj = {};
-  for (let longURL in db) {
+  const obj = {};
+  for (const longURL in db) {
     obj.longURL = db[longURL].longURL;
   }
   return obj;
-}
-
-console.log(getUserURL('admin', urlDatabase));
-
+};
 
 module.exports = { 
   authenticateEmail,

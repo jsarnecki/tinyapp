@@ -1,7 +1,7 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 const PORT = 8080;
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 app.set('view engine', 'ejs');
@@ -11,14 +11,13 @@ app.use(cookieSession({
   keys: ['secret test one', 'another secret test']
 }));
 
-const { 
+const {
   generateRandomString,
   authenticateUser,
   getUserByEmail,
   findHashPassword,
-  getUserURL,
-  originalDataLayout
-  } = require('./helpers/helperFunctions');
+  getUserURL
+} = require('./helpers/helperFunctions');
 
 const { users, urlDatabase } = require('./helpers/data');
 
@@ -31,10 +30,6 @@ app.get('/urls', (req, res) => {
   const urlDB = getUserURL(user, urlDatabase);
   //Returns an object of short/long urls for the current loggedin user
 
-  const formattedURLS = originalDataLayout(urlDB);
-  //FormattedURLS returns an object in the original object layout, that is much easier to work with, 
-  //rather than objects nested inside on object
-
   const templateVars = {
     urls: urlDB,
     users,
@@ -45,7 +40,7 @@ app.get('/urls', (req, res) => {
 });
 
 ////NEW
-app.get("/urls/new", (req, res) => {
+app.get('/urls/new', (req, res) => {
   const user = req.session.user_id;
   //Uses the info stored of user from cookieSession
   const templateVars = {
@@ -53,17 +48,17 @@ app.get("/urls/new", (req, res) => {
     users,
     user
   };
-  res.render("urls_new", templateVars);
+  res.render('urls_new', templateVars);
 });
 
-/////URLS SHOW --- SPECIFIC SHORT URL 
+/////URLS SHOW --- SPECIFIC SHORT URL
 app.get('/urls/:shortURL', (req, res) => {
 
   const user = req.session.user_id;
   if (!user) {
     //If trying to access link not logged in
     return res.status(403).send('404 Error: Forbidden');
-    };
+  }
 
   const urlDB = getUserURL(user, urlDatabase);
   const templateVars = {
@@ -77,7 +72,7 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 /////TO ACTUAL LONG URL REDIRECT
-app.get("/u/:shortURL", (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
@@ -114,13 +109,19 @@ app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
 
-  if (longURL.length === 0 || !longURL.includes("http://")) {
-    //if longURL does not start with http://, return error
+  if (!longURL.includes('http://')) {
+    //If longURL does not start with http:// return error
     return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
-  };
+  }
+
+  if (longURL.length < 12) {
+    //If longURL is less than avg url length return error
+    return res.status(403).send('404 Error: Invalid URL input.  URL not long enough');
+  }
 
   const user = req.session.user_id;
   urlDatabase[shortURL] = {
+    //adds new shorturl to user's database
     longURL: longURL,
     users,
     userID: user
@@ -147,12 +148,17 @@ app.post('/urls/:shortURL', (req, res) => {
   const updatedLongURL = req.body.updatedLongURL;
   const shortURL = req.params.shortURL;
   
-  if (updatedLongURL.length === 0 || !updatedLongURL.includes("http://")) {
-    //If updatedLongURL is no length, or does not start with http:// return error
+  if (!updatedLongURL.includes('http://')) {
+    //If updatedLongURL does not start with http:// return error
     return res.status(403).send('404 Error: Invalid URL input.  Please begin URL with http://');
   }
 
-  //update the urlDB 
+  if (updatedLongURL.length < 12) {
+    //If updatedLongURL is less than avg url length return error
+    return res.status(403).send('404 Error: Invalid URL input.  URL not long enough');
+  }
+
+  //update the urlDB
   urlDatabase[shortURL].longURL = updatedLongURL;
   res.redirect('/urls');
 });
@@ -197,6 +203,7 @@ app.post('/register', (req, res) => {
   //authenticates the ID, email, and checks for empty inputs
   const {error, data} = authenticateUser(newUser, users);
   //validates that there is infact input
+  //data kept for potential future user/data usage
   
   if (error) {
     return res.status(400).send(error);
@@ -205,7 +212,7 @@ app.post('/register', (req, res) => {
   //Now hash the password
   const hashedPassword = bcrypt.hashSync(newUser.password, 10);
   newUser.password = hashedPassword;
-  //UPDATE newUser.password to hashed before so not to store text-password
+  //Update newUser.password to hashed before so not to store text-password
 
   users[newUser.id] = newUser;
   //adds newUser to users
@@ -215,5 +222,5 @@ app.post('/register', (req, res) => {
 
 /////////LISTEN///////////
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tiny App server listening on port ${PORT}!`);
 });

@@ -1,13 +1,11 @@
 const { assert } = require('chai');
 
-const { 
-  authenticateEmail,
+const {
   authenticateUser,
   getUserByEmail,
   findHashPassword,
-  getUserURL,
-  originalDataLayout
-  } = require('../Helpers/helperFunctions');
+  getUserURL
+} = require('../Helpers/helperFunctions');
 
   const users = {
     'testUser': {
@@ -38,7 +36,6 @@ const {
     }
   };
 
-
   describe('getUserByEmail', function() {
     it('should return a user with a valid email', function() {
 
@@ -55,7 +52,6 @@ const {
     });
   });
 
-
   describe('findHashPassword', function() {
     it('should return a hashpassword connected to the given email', function() {
 
@@ -64,7 +60,6 @@ const {
 
       assert(hashPassword, expectedHashPassword);
     });
-
   });
 
   describe('authenticateUser', function() {
@@ -79,10 +74,9 @@ const {
       const user = authenticateUser(test, users); 
       assert.isObject(user.data);
     });
-
   });
 
-    describe('getUserURL', function() {
+  describe('getUserURL', function() {
     it('should return return an object containing all the urls that user has stored in the database', function() {
 
       const adminURLs = getUserURL('admin', urlDatabase);
@@ -93,10 +87,9 @@ const {
 
       assert.deepEqual(adminURLs, expected);
     });
-
   });
 
-    describe('authenticateUser', function() {
+  describe('authenticateUser', function() {
     it('should throw appropriate error when input is null', function() {
 
       const emptyInput = {
@@ -110,30 +103,6 @@ const {
 
       assert(noInputID.error, expected);
     });
-
-    // it('should throw appropriate error when user details are already in use', function() {
-
-    //   const inputTaken = {
-    //     id: 'anID',
-    //     email: 'joshsarnecki@gmail.com',
-    //     password: 'shhh super secret'
-    //   };
-
-    //   const alreadyInUse = authenticateUser(inputTaken);
-    //   const expected = '404 Error: Email already in use';
-
-    //   assert(alreadyInUse.error, expected);
-    // });
-
-
-    // it('should throw appropriate error when user details are already in use', function() {
-
-    //   const  = 
-    //   const expected= 
-
-    //   assert();
-    // });
-
   });
 
 
@@ -141,13 +110,4 @@ const {
 
 
 
-  // describe('', function() {
-  //   it('should return ', function() {
-
-  //     const  = 
-  //     const expected= 
-
-  //     assert();
-  //   });
-
-  // });
+  
