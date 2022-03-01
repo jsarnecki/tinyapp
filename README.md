@@ -6,7 +6,7 @@ TinyApp is a full stack - though less focused on front-end, prioritizing back-en
 
 !["TinyApp welcome page"](https://github.com/jsarnecki/tinyapp/blob/master/Screenshots/tinyapp-screenshot4.png?raw=true)
 
-!["TinyApp register page"] *to be updated in next commit*
+!["TinyApp register page"](https://github.com/jsarnecki/tinyapp/blob/master/Screenshots/tinyapp-screenshot3.png?raw=true)
 
 !["TinyApp short url example page"](https://github.com/jsarnecki/tinyapp/blob/master/Screenshots/tinyapp-screenshot2.png?raw=true)
 
