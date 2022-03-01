@@ -13,11 +13,8 @@ const users = {
   }
 };
 
-
-/*
-FOR POTENTIAL TESTING PURPOSES
-
-const urlDatabase = {
+// For potential testing purposes
+const testDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
     userID: "admin"
@@ -28,7 +25,7 @@ const urlDatabase = {
   }
 };
 
-const users = {
+const testUsers = {
   'testUser': {
     id: 'testUser',
     email: 'test@user.ca',
@@ -45,6 +42,5 @@ const users = {
       password: "purple-monkey-dinosaur"
   }
 };
-*/
 
 module.exports = { users, urlDatabase };

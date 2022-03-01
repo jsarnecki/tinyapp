@@ -1,4 +1,3 @@
-//FOR POTENTIAL TESTING PURPOSES
 const users = {
   'testUser': {
     id: 'testUser',
@@ -16,7 +15,7 @@ const users = {
       password: "purple-monkey-dinosaur"
   }
 };
-//FOR POTENTIAL TESTING PURPOSES
+
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
